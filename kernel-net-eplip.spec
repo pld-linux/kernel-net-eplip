@@ -1,9 +1,9 @@
-# $Revision: 1.1 $
+# $Revision: 1.2 $
 #
 # TODO: UP/SMP (if this spec is useful for something now?)
 #
 # Conditional build:
-%bcond_without  dist_kernel	# without kernel from distribution
+%bcond_without	dist_kernel	# without kernel from distribution
 #
 %define		no_install_post_compress_modules	1
 
@@ -11,7 +11,7 @@
 %define		_rel	1
 
 Summary:	EPLIP driver for 2.6.xx kernels
-Summary(pl):	Sterownik EPLIP dla kerneli 2.6.xx
+Summary(pl):	Sterownik EPLIP dla j±der 2.6.xx
 Name:		kernel-net-eplip
 Version:	0.5.6
 Release:	%{_rel}@%{_kernel_ver_str}
