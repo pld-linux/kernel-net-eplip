@@ -1,9 +1,8 @@
-# $Revision: 1.3 $
+# $Revision: 1.4 $
 #
 # Conditional build:
 %bcond_without	dist_kernel	# without kernel from distribution
 #
-%define		no_install_post_compress_modules	1
 
 %define		_orig_name	eplip
 %define		_rel	1
@@ -19,6 +18,7 @@ Source0:	http://e-plip.sourceforge.net/%{_orig_name}-%{version}.tar.gz
 # Source0-md5:	43019250e7227857ae13bdd39a45494d
 Patch0:		eplip-2.6.x.patch
 Patch1:		kernel-eplip-WIRING.patch
+Patch2:		eplip-2.6.x2.patch
 URL:		http://e-plip.sourceforge.net/
 BuildRequires:	rpmbuild(macros) >= 1.118
 %{?with_dist_kernel:BuildRequires:	kernel-module-build}
@@ -52,6 +52,7 @@ SMP.
 %setup -q -n %{_orig_name}-%{version}
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
 cat <<EOF > Makefile
 CONFIG_X86=1
 CONFIG_ISA=1
@@ -64,28 +65,30 @@ install -d build-done/{UP,SMP}
 ln -sf %{_kernelsrcdir}/config-up .config
 rm -rf include
 install -d include/{linux,config}
-ln -sf %{_kernelsrcdir}/include/linux/autoconf.h include/linux/autoconf.h
-ln -sf %{_kernelsrcdir}/asm-%{_arch} include/asm
+ln -sf %{_kernelsrcdir}/include/linux/autoconf-up.h include/linux/autoconf.h
+ln -sf %{_kernelsrcdir}/include/asm-%{_arch} include/asm
 touch include/config/MARKER
 %{__make} -C %{_kernelsrcdir} modules \
-	SUBDIRS=$PWD \
+	M=$PWD \
 	O=$PWD \
 	V=1
 mv *.ko build-done/UP
 
-%{__make} -C %{_kernelsrcdir} mrproper \
-	SUBDIRS=$PWD \
-	O=$PWD \
-	V=1
+# it doesn't work 
+#%{__make} -C %{_kernelsrcdir} mrproper \
+#	M=$PWD \
+#	O=$PWD \
+#	V=1
+find . -name "*.o" -exec rm '{}' ';'
 
 ln -sf %{_kernelsrcdir}/config-smp .config
 rm -rf include
 install -d include/{linux,config}
-ln -sf %{_kernelsrcdir}/include/linux/autoconf.h include/linux/autoconf.h
-ln -sf %{_kernelsrcdir}/asm-%{_arch} include/asm
+ln -sf %{_kernelsrcdir}/include/linux/autoconf-smp.h include/linux/autoconf.h
+ln -sf %{_kernelsrcdir}/include/asm-%{_arch} include/asm
 touch include/config/MARKER
 %{__make} -C %{_kernelsrcdir} modules \
-	SUBDIRS=$PWD \
+	M=$PWD \
 	O=$PWD \
 	V=1
 
