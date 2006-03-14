@@ -190,7 +190,7 @@ diff -Nru eplip-0.5.6.orig/eplip-drv.c eplip-0.5.6/eplip-drv.c
          netif_start_queue (dev);
  
 -        MOD_INC_USE_COUNT;
-+//        MOD_INC_USE_COUNT;
++        try_module_get(THIS_MODULE);
  
  	return 0;
  }
@@ -208,7 +208,7 @@ diff -Nru eplip-0.5.6.orig/eplip-drv.c eplip-0.5.6/eplip-drv.c
          ecp_close(nl->dev);
  
 -        MOD_DEC_USE_COUNT;
-+        //MOD_DEC_USE_COUNT;
++        module_put(THIS_MODULE);
  
          return 0;
  
