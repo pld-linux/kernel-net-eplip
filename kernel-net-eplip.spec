@@ -1,11 +1,11 @@
-# $Revision: 1.4 $
+# $Revision: 1.5 $
 #
 # Conditional build:
 %bcond_without	dist_kernel	# without kernel from distribution
 #
 
 %define		_orig_name	eplip
-%define		_rel	1
+%define		_rel	2
 
 Summary:	EPLIP driver for 2.6.x kernels
 Summary(pl):	Sterownik EPLIP dla j±der 2.6.x
