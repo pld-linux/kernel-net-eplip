@@ -1,4 +1,4 @@
-# $Revision: 1.5 $
+# $Revision: 1.6 $
 #
 # Conditional build:
 %bcond_without	dist_kernel	# without kernel from distribution
@@ -20,8 +20,8 @@ Patch0:		eplip-2.6.x.patch
 Patch1:		kernel-eplip-WIRING.patch
 Patch2:		eplip-2.6.x2.patch
 URL:		http://e-plip.sourceforge.net/
-BuildRequires:	rpmbuild(macros) >= 1.118
 %{?with_dist_kernel:BuildRequires:	kernel-module-build}
+BuildRequires:	rpmbuild(macros) >= 1.118
 %{?with_dist_kernel:%requires_releq_kernel_up}
 Requires(post,postun):	modutils
 ExclusiveArch:	%{ix86}
@@ -74,7 +74,7 @@ touch include/config/MARKER
 	V=1
 mv *.ko build-done/UP
 
-# it doesn't work 
+# it doesn't work
 #%{__make} -C %{_kernelsrcdir} mrproper \
 #	M=$PWD \
 #	O=$PWD \
