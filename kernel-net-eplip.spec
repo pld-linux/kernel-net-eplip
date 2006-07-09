@@ -1,4 +1,3 @@
-# $Revision: 1.6 $
 #
 # Conditional build:
 %bcond_without	dist_kernel	# without kernel from distribution
