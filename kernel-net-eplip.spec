@@ -1,6 +1,7 @@
 #
 # Conditional build:
 %bcond_without	dist_kernel	# without kernel from distribution
+%bcond_without	smp		# without smp version
 #
 
 %define		_orig_name	eplip
@@ -18,6 +19,7 @@ Source0:	http://e-plip.sourceforge.net/%{_orig_name}-%{version}.tar.gz
 Patch0:		eplip-2.6.x.patch
 Patch1:		kernel-eplip-WIRING.patch
 Patch2:		eplip-2.6.x2.patch
+Patch3:		%{name}-module_param_array.patch
 URL:		http://e-plip.sourceforge.net/
 %{?with_dist_kernel:BuildRequires:	kernel-module-build}
 BuildRequires:	rpmbuild(macros) >= 1.118
@@ -52,52 +54,65 @@ SMP.
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
+
+%build
+install -d build-done/{UP,SMP}
+rm -rf include
+install -d o/include/{linux,config}
+ln -sf %{_kernelsrcdir}/config-up o/.config
+ln -sf %{_kernelsrcdir}/include/linux/autoconf-up.h o/include/linux/autoconf.h
+ln -sf %{_kernelsrcdir}/include/asm-%{_arch} o/include/asm
+ln -sf %{_kernelsrcdir}/Module.symvers-up o/Module.symvers
+#touch include/config/MARKER
 cat <<EOF > Makefile
 CONFIG_X86=1
 CONFIG_ISA=1
 obj-m += eplip.o
-eplip-objs := ecp.o eplip-drv.o
+eplip-objs := eplip-drv.o
 EOF
-
-%build
-install -d build-done/{UP,SMP}
-ln -sf %{_kernelsrcdir}/config-up .config
-rm -rf include
-install -d include/{linux,config}
-ln -sf %{_kernelsrcdir}/include/linux/autoconf-up.h include/linux/autoconf.h
-ln -sf %{_kernelsrcdir}/include/asm-%{_arch} include/asm
-touch include/config/MARKER
+%{__make} -C %{_kernelsrcdir} O=$PWD/o prepare scripts
 %{__make} -C %{_kernelsrcdir} modules \
+	SYSRC=%{_kernelsrcdir} \
+	SYSOUT=$PWD/o \
 	M=$PWD \
-	O=$PWD \
+	O=$PWD/o \
 	V=1
 mv *.ko build-done/UP
 
-# it doesn't work
-#%{__make} -C %{_kernelsrcdir} mrproper \
-#	M=$PWD \
-#	O=$PWD \
-#	V=1
-find . -name "*.o" -exec rm '{}' ';'
-
+%if %{with smp}
 ln -sf %{_kernelsrcdir}/config-smp .config
 rm -rf include
 install -d include/{linux,config}
 ln -sf %{_kernelsrcdir}/include/linux/autoconf-smp.h include/linux/autoconf.h
 ln -sf %{_kernelsrcdir}/include/asm-%{_arch} include/asm
-touch include/config/MARKER
+ln -sf %{_kernelsrcdir}/Module.symvers-smp Module.symvers
+#touch include/config/MARKER
+%{__make} -C %{_kernelsrcdir} O=$PWD prepare scripts
+%{__make} -C %{_kernelsrcdir} clean \
+	RCS_FIND_IGNORE="-name '*.ko' -o" \
+	SYSSRC=%{_kernelsrcdir} \
+	SYSOUT=$PWD/o \
+	M=$PWD O=$PWD/o \
+	V=1
 %{__make} -C %{_kernelsrcdir} modules \
+	SYSRC=%{_kernelsrcdir} \
+	SYSOUT=$PWD \
 	M=$PWD \
 	O=$PWD \
 	V=1
 
 mv *.ko build-done/SMP
+%endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/kernel/drivers/net
 cp build-done/UP/* $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/kernel/drivers/net
+
+%if %{with smp}
 cp build-done/SMP/* $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/kernel/drivers/net
+%endif
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -119,7 +134,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc ChangeLog LAME-TESTS README TODO TODO-done WIRING
 /lib/modules/%{_kernel_ver}/kernel/drivers/net/*
 
+%if %{with smp}
 %files -n kernel-smp-net-eplip
 %defattr(644,root,root,755)
 %doc ChangeLog LAME-TESTS README TODO TODO-done WIRING
 /lib/modules/%{_kernel_ver}smp/kernel/drivers/net/*
+%endif
