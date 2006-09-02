@@ -16,9 +16,9 @@ License:	GPL
 Group:		Base/Kernel
 Source0:	http://e-plip.sourceforge.net/%{_orig_name}-%{version}.tar.gz
 # Source0-md5:	43019250e7227857ae13bdd39a45494d
-Patch0:		eplip-2.6.x.patch
+Patch0:		%{name}-1.patch
 Patch1:		kernel-eplip-WIRING.patch
-Patch2:		eplip-2.6.x2.patch
+Patch2:		%{name}-2.patch
 Patch3:		%{name}-module_param_array.patch
 URL:		http://e-plip.sourceforge.net/
 %{?with_dist_kernel:BuildRequires:	kernel-module-build}
