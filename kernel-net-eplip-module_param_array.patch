@@ -1,0 +1,37 @@
+--- eplip-0.5.6/eplip-drv.c.old	2006-09-02 08:52:00.000000000 +0200
++++ eplip-0.5.6/eplip-drv.c	2006-09-02 09:23:42.000000000 +0200
+@@ -39,7 +39,7 @@
+                                 /* Our Driver headers           */
+ #include "sysdep.h"
+ #include "ioport.h"
+-#include "ecp.h"
++#include "ecp.c"
+ 
+ #ifndef MAX_DMA_PHYS_ADDRESS
+ #  define MAX_DMA_PHYS_ADDRESS 0x1000000
+@@ -696,7 +696,7 @@
+ 
+ 	skb->mac.raw=skb->data;
+ 	skb_pull(skb,dev->hard_header_len);
+-	eth= skb->mac.raw;
++	eth= (struct ethhdr *)skb->mac.raw;
+ 
+ 	if(*eth->h_dest&1)
+ 	{
+@@ -2308,11 +2308,11 @@
+ static int mode[EPLIP_MAX]= { [0 ... EPLIP_MAX-1] = -1 };
+ static unsigned long hwaddr[EPLIP_MAX] =  { [0 ... EPLIP_MAX-1] =  0 };
+ 
+-MODULE_PARM(io , "1-" __MODULE_STRING(EPLIP_MAX) "i");
+-MODULE_PARM(irq, "1-" __MODULE_STRING(EPLIP_MAX) "i");
+-MODULE_PARM(dma, "1-" __MODULE_STRING(EPLIP_MAX) "i");
+-MODULE_PARM(mode,"1-" __MODULE_STRING(EPLIP_MAX) "i");
+-MODULE_PARM(hwaddr, "1-" __MODULE_STRING(EPLIP_MAX) "i");
++module_param_array(io , int, NULL, 0);
++module_param_array(irq, int, NULL, 0);
++module_param_array(dma, int, NULL, 0);
++module_param_array(mode, int, NULL, 0);
++module_param_array(hwaddr, int, NULL, 0);
+ 
+ MODULE_PARM_DESC(io  , "The Base IO port this device uses") ;
+ MODULE_PARM_DESC(irq , "The IRQ Line this device uses");
