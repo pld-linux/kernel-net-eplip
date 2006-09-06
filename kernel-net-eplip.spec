@@ -71,7 +71,7 @@ CONFIG_ISA=1
 obj-m += eplip.o
 eplip-objs := eplip-drv.o
 EOF
-%{__make} -C %{_kernelsrcdir} O=$PWD/o prepare scripts
+%{__make} -j1 -C %{_kernelsrcdir} O=$PWD/o prepare scripts
 %{__make} -C %{_kernelsrcdir} modules \
 	SYSRC=%{_kernelsrcdir} \
 	SYSOUT=$PWD/o \
