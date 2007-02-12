@@ -8,7 +8,7 @@
 %define		_rel	2
 
 Summary:	EPLIP driver for 2.6.x kernels
-Summary(pl):	Sterownik EPLIP dla j±der 2.6.x
+Summary(pl.UTF-8):   Sterownik EPLIP dla jÄ…der 2.6.x
 Name:		kernel-net-eplip
 Version:	0.5.6
 Release:	%{_rel}@%{_kernel_ver_str}
@@ -31,12 +31,12 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %description
 EPLIP (Enhanced Parallel Line IP) driver module for 2.6.x kernels.
 
-%description -l pl
-Modu³ sterownika EPLIP (Enhanced Parallel Line IP) dla j±der 2.6.x.
+%description -l pl.UTF-8
+ModuÅ‚ sterownika EPLIP (Enhanced Parallel Line IP) dla jÄ…der 2.6.x.
 
 %package -n kernel-smp-net-eplip
 Summary:	EPLIP driver for 2.6.x SMP kernels
-Summary(pl):	Sterownik EPLIP dla j±der 2.6.x SMP
+Summary(pl.UTF-8):   Sterownik EPLIP dla jÄ…der 2.6.x SMP
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
 %{?with_dist_kernel:%requires_releq_kernel_smp}
@@ -45,8 +45,8 @@ Requires(post,postun):	modutils
 %description -n kernel-smp-net-eplip
 EPLIP (Enhanced Parallel Line IP) driver module for 2.6.x SMP kernels.
 
-%description -n kernel-smp-net-eplip -l pl
-Modu³ sterownika EPLIP (Enhanced Parallel Line IP) dla j±der 2.6.x
+%description -n kernel-smp-net-eplip -l pl.UTF-8
+ModuÅ‚ sterownika EPLIP (Enhanced Parallel Line IP) dla jÄ…der 2.6.x
 SMP.
 
 %prep
