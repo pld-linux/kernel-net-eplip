@@ -1,0 +1,23 @@
+diff -Nru eplip-0.5.6.old/ecp.c eplip-0.5.6/ecp.c
+--- eplip-0.5.6.old/ecp.c	2010-10-14 19:32:07.000000000 +0200
++++ eplip-0.5.6/ecp.c	2010-10-14 19:49:40.000000000 +0200
+@@ -36,7 +36,7 @@
+ 
+ #if ( defined( LINUX ) || defined ( linux ) ) && defined( __KERNEL__ )
+ #  define __NO_VERSION__
+-#  include <linux/config.h>
++#  include <linux/autoconf.h>
+ #  include <linux/module.h>
+ #  include <linux/kernel.h>
+ #  include <linux/sched.h>
+diff -Nru eplip-0.5.6.old/eplip-drv.c eplip-0.5.6/eplip-drv.c
+--- eplip-0.5.6.old/eplip-drv.c	2010-10-14 19:32:41.000000000 +0200
++++ eplip-0.5.6/eplip-drv.c	2010-10-14 19:49:23.000000000 +0200
+@@ -1,6 +1,6 @@
+ 
+                                 /* The necessary header files   */
+-#include <linux/config.h>       /* system name and global items */
++#include <linux/autoconf.h>       /* system name and global items */
+                                 /* Standard in kernel modules   */
+ #include <linux/module.h>
+ #include <linux/kernel.h>

@@ -1,0 +1,23 @@
+--- eplip-0.5.6.old/eplip-drv.c	2010-10-13 08:27:05.000000000 +0200
++++ eplip-0.5.6/eplip-drv.c	2010-10-13 08:30:31.000000000 +0200
+@@ -700,9 +700,9 @@
+ 	struct ethhdr *eth;
+ 	unsigned char *rawp;
+ 
+-	skb->mac.raw=skb->data;
++	skb->mac_header = skb->data;
+ 	skb_pull(skb,dev->hard_header_len);
+-	eth= (struct ethhdr *)skb->mac.raw;
++	eth= (struct ethhdr *)skb->mac_header;
+ 
+ 	if(*eth->h_dest&1)
+ 	{
+@@ -2016,7 +2016,7 @@
+ 
+         struct net_local *nl = (struct net_local *)dev->priv;
+ 	struct in_device *in_dev;
+-        unsigned long   intrflags = ( nl->dev->flags & ECPDEV_IRQ_TRIGGER )?SA_SHIRQ:0;
++        unsigned long   intrflags = ( nl->dev->flags & ECPDEV_IRQ_TRIGGER ) ? IRQF_SHARED : 0;
+ 
+         nl->connection=EPLIP_CN_NONE;
+ 

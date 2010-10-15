@@ -1,0 +1,102 @@
+--- eplip-0.5.6.old/eplip-drv.c	2010-10-12 18:34:40.000000000 +0200
++++ eplip-0.5.6/eplip-drv.c	2010-10-12 18:53:02.000000000 +0200
+@@ -60,6 +60,10 @@
+ #define NET_DEBUG 0
+ #endif
+ 
++#ifndef EPLIP_DEBUG
++#define EPLIP_DEBUG 0
++#endif
++
+ #define EPLIP_MTU    (16360+2)
+ #define PKT_BUF_SZ (EPLIP_MTU+ETH_HLEN)
+ 
+@@ -336,9 +340,10 @@
+ struct net_local {
+ 
+ 	struct net_device_stats enet_stats;
++	struct net_device *ndev;
+ 
+         struct work_struct immediate;                     /** for immediate Bottom Half handler           */
+-        struct work_struct deferred;                      /** for deffered  Bottom Half handler           */
++        struct delayed_work deferred;                      /** for deferred  Bottom Half handler           */
+ 
+         struct eplip_local snd_data;
+ 	struct eplip_local rcv_data;
+@@ -388,8 +393,8 @@
+ /* Index to functions, as function prototypes. */
+ 
+ /* Bottom halves */
+-static void eplip_kick_bh(struct net_device *dev);
+-static void eplip_bh(struct net_device *dev);
++static void eplip_kick_bh(struct work_struct *work);
++static void eplip_bh(struct work_struct *work);
+ 
+ /* Functions for DEV methods */
+ static int eplip_tx_packet(struct sk_buff *skb, struct net_device *dev);
+@@ -458,7 +463,7 @@
+ 
+ static void dma_timeout_routine( unsigned long timer_data );
+ 
+-int __init
++int
+ eplip_init_dev(struct net_device *dev, ecp_dev *ecpdev,unsigned long hwaddr)
+ {
+ 	struct  net_local *nl;
+@@ -510,6 +515,7 @@
+ 	nl = (struct net_local *) dev->priv;
+ 
+         nl->mru = EPLIP_MRU ;
++	nl->ndev = dev;
+ 
+         i=3;
+         while( (dev->dma > 0 )) {
+@@ -573,8 +579,8 @@
+ 
+ 	/* Initialize task queue structures */
+ #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,4,0)
+-        INIT_WORK(&nl->immediate, (void (*)(void *))eplip_bh, dev);
+-        INIT_WORK(&nl->deferred, (void (*)(void *))eplip_kick_bh, dev);
++        INIT_WORK(&nl->immediate, eplip_bh);
++        INIT_DELAYED_WORK(&nl->deferred, eplip_kick_bh);
+ 
+ #else
+         nl->immediate.next = NULL;
+@@ -613,10 +619,10 @@
+    Request `eplip_bh' to be invoked. */
+ 
+ static void
+-eplip_kick_bh(struct net_device *dev)
++eplip_kick_bh(struct work_struct *work)
+ 
+ {
+-	struct net_local *nl = (struct net_local *)dev->priv;
++	struct net_local *nl = container_of(work, struct net_local, deferred.work);
+ 
+         spin_lock_irq( &nl->lock );
+ 	if ( nl->is_deferred ) {
+@@ -642,10 +648,10 @@
+ 
+ /* Bottom half handler of EPLIP. */
+ static void
+-eplip_bh
+-(struct net_device *dev)
++eplip_bh(struct work_struct *work)
+ {
+-	struct net_local *nl = (struct net_local *)dev->priv;
++	struct net_local *nl = container_of(work, struct net_local, immediate);
++
+ 	struct eplip_local *snd = &nl->snd_data;
+ 	struct eplip_local *rcv = &nl->rcv_data;
+ 	eplip_func f;
+@@ -653,8 +659,8 @@
+ 
+                 nl->is_deferred = 0;
+                 f = connection_state_table[nl->connection];
+-                if ((r = (*f)(dev, nl, snd, rcv)) != OK
+-                && (r = eplip_bh_timeout_error(dev, nl, snd, rcv, r)) != OK) {
++                if ((r = (*f)(nl->ndev, nl, snd, rcv)) != OK
++                && (r = eplip_bh_timeout_error(nl->ndev, nl, snd, rcv, r)) != OK) {
+ 	                nl->is_deferred = 1;
+ 	                schedule_delayed_work(&nl->deferred, 1);
+                 }

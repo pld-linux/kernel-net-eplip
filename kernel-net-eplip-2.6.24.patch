@@ -1,0 +1,253 @@
+--- eplip-0.5.6.old/eplip-drv.c	2010-10-13 13:04:55.000000000 +0200
++++ eplip-0.5.6/eplip-drv.c	2010-10-13 14:02:56.000000000 +0200
+@@ -488,7 +488,6 @@
+ 	dev->get_stats 		 = eplip_get_stats;
+         dev->change_mtu          = eplip_change_mtu;
+        	//dev->do_ioctl		 = eplip_ioctl;
+-	dev->header_cache_update = NULL;
+ 
+ 	dev->tx_queue_len 	 = 10;
+ 	//dev->flags	        |= IFF_POINTOPOINT|IFF_NOARP;
+@@ -505,14 +504,15 @@
+       //  }
+ 	/* Set the private structure */
+ 
++/*
+ 	dev->priv = kmalloc(sizeof (struct net_local), GFP_KERNEL);
+ 	if (!dev->priv) {
+ 		printk(KERN_ERR "%s: out of memory\n", dev->name);
+ 		return -ENOMEM;
+ 	}
+ 	memset(dev->priv, 0, sizeof(struct net_local));
+-
+-	nl = (struct net_local *) dev->priv;
++*/
++	nl = (struct net_local *)netdev_priv(dev);
+ 
+         nl->mru = EPLIP_MRU ;
+ 	nl->ndev = dev;
+@@ -757,7 +757,7 @@
+                  unsigned short type, void *daddr,
+ 	         void *saddr, unsigned len)
+ {
+-	struct net_local *nl = (struct net_local *)dev->priv;
++	struct net_local *nl = netdev_priv(dev);
+ 	int ret;
+ 
+ 	if ((ret = nl->orig_hard_header(skb, dev, type, daddr, saddr, len)) >= 0)
+@@ -770,7 +770,7 @@
+ eplip_hard_header_cache(struct neighbour *neigh,
+                            struct hh_cache *hh)
+ {
+-	struct net_local *nl = (struct net_local *)neigh->dev->priv;
++	struct net_local *nl = netdev_priv(neigh->dev);
+ 	int ret;
+ 
+ 	if ((ret = nl->orig_hard_header_cache(neigh, hh)) == 0)
+@@ -891,7 +891,7 @@
+ static int
+ eplip_tx_packet(struct sk_buff *skb, struct net_device *dev)
+ {
+-	struct net_local *nl = (struct net_local *)dev->priv;
++	struct net_local *nl = netdev_priv(dev);
+ 	struct eplip_local *snd = &nl->snd_data;
+ 
+ 	if (netif_queue_stopped(dev))
+@@ -989,7 +989,7 @@
+ static int
+ eplip_dma_close( struct net_device* dev )
+ {
+-        struct net_local *nl = (struct net_local*)dev->priv ;
++        struct net_local *nl = netdev_priv(dev);
+         unsigned long flags;
+         int bytes_left;
+ #ifdef PARANOID
+@@ -1024,7 +1024,7 @@
+ static int
+ eplip_dma_send_data( struct net_device* dev )
+ {
+-        struct net_local        *nl  = (struct net_local*)dev->priv;
++        struct net_local        *nl  = netdev_priv(dev);
+         struct eplip_local      *snd = &nl->snd_data;
+         unsigned long           flags;
+         u32                     phys_addr;
+@@ -1074,7 +1074,7 @@
+ static int
+ eplip_dma_receive_data( struct net_device* dev)
+ {
+-        struct net_local        *nl  = (struct net_local*)dev->priv;
++        struct net_local        *nl  = netdev_priv(dev);
+         struct eplip_local      *rcv = &nl->rcv_data;
+         unsigned long           flags;
+ 
+@@ -2014,7 +2014,7 @@
+ eplip_open(struct net_device *dev)
+ {
+ 
+-        struct net_local *nl = (struct net_local *)dev->priv;
++        struct net_local *nl = netdev_priv(dev);
+ 	struct in_device *in_dev;
+         unsigned long   intrflags = ( nl->dev->flags & ECPDEV_IRQ_TRIGGER ) ? IRQF_SHARED : 0;
+ 
+@@ -2088,7 +2088,7 @@
+ static int
+ eplip_close(struct net_device *dev)
+ {
+-	struct net_local *nl = (struct net_local *)dev->priv;
++	struct net_local *nl = netdev_priv(dev);
+         struct eplip_local *snd = &nl->snd_data;
+ 	struct eplip_local *rcv = &nl->rcv_data;
+ 
+@@ -2141,7 +2141,7 @@
+ static struct net_device_stats *
+ eplip_get_stats(struct net_device *dev)
+ {
+-	struct net_local *nl = (struct net_local *)dev->priv;
++	struct net_local *nl = netdev_priv(dev);
+ 	struct net_device_stats *r = &nl->enet_stats;
+ 
+ 	return r;
+@@ -2149,7 +2149,7 @@
+ 
+ static int eplip_change_mtu(struct net_device *dev, int new_mtu)
+ {
+-        struct net_local *nl = (struct net_local *)dev->priv;
++        struct net_local *nl = netdev_priv(dev);
+ 
+ 	if ((new_mtu < 68) || (new_mtu > EPLIP_MRU))
+ 		return -EINVAL;
+@@ -2174,7 +2174,7 @@
+ static int
+ eplip_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
+ {
+-	struct net_local *nl = (struct net_local *) dev->priv;
++	struct net_local *nl = netdev_priv(dev);
+ 	struct plipconf *pc = (struct plipconf *) &rq->ifr_data;
+ 
+ 	switch(pc->pcmd) {
+@@ -2211,7 +2211,7 @@
+ 		return;
+ 	}
+ #endif
+-	nl = (struct net_local *)dev->priv;
++	nl = netdev_priv(dev);
+ 	rcv = &nl->rcv_data;
+ 
+ 	spin_lock_irq (&nl->lock);
+@@ -2348,16 +2348,17 @@
+ }
+ 
+ static void
+-cleanup( struct net_device eplip_net_dev[] )
++cleanup(struct net_device *eplip_net_dev[])
+ {
+         int i  = EPLIP_MAX ;
+         while( i-- ) {
++		if (eplip_net_dev[i]) {
+ 
+-                if( eplip_net_dev[i].priv ) {
++                        struct net_local *nl = netdev_priv(eplip_net_dev[i]);
+ 
+-                        struct net_local *nl = (struct net_local*)eplip_net_dev[i].priv ;
++			if (!nl) continue;
+ 
+-                        unregister_netdev( &(eplip_net_dev[i]) );
++                        unregister_netdev(eplip_net_dev[i]);
+ 
+                         if( nl->bounce_buff ) {
+                                 kfree( nl->bounce_buff );
+@@ -2366,11 +2367,12 @@
+                         cleanup_ecp_dev( nl->dev );
+                         kfree( nl->dev);
+ 
+-                        kfree( eplip_net_dev[i].priv );
+-                        eplip_net_dev[i].priv = NULL;
++                        /*kfree( eplip_net_dev[i].priv );
++                        eplip_net_dev[i].priv = NULL;*/
+ 
+                 }
+ 
++#if 0
+ #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,4,0)
+ #else
+                 if( eplip_net_dev[i].name ) {
+@@ -2378,6 +2380,7 @@
+                         eplip_net_dev[i].name=NULL;
+                 }
+ #endif
++#endif
+         }
+ 
+ }
+@@ -2471,7 +2474,7 @@
+         return OK ;
+ }
+ 
+-static struct net_device dev_eplip[EPLIP_MAX] ;
++static struct net_device *dev_eplip[EPLIP_MAX] ;
+ 
+ /* Initialize the module */
+ static int
+@@ -2480,15 +2483,23 @@
+ 	int i = -1 ;
+         int ndevs = 0 ;
+         int error = 0 ;
++	char name[IFNAMSIZ];
+ 
+ 
+ 	printk(KERN_INFO "%s-%s(%s) by %s(%s)\n",driver,version,date,author,email);
+ 
+-        memset( dev_eplip , 0 , (sizeof( struct net_device ) )* EPLIP_MAX ) ;
++        memset( dev_eplip , 0 , (sizeof( struct net_device *) )* EPLIP_MAX ) ;
+ 
+         while(  ( (++i) < EPLIP_MAX )  && ( io[i] > 0 ) ) {
+ 
+         	ecp_dev* dev = 0L ;
++		sprintf(name, "eplip%d", i);
++		dev_eplip[i] = alloc_etherdev(sizeof(struct net_local));
++		if (!dev_eplip[i]) {
++			printk(KERN_ERR "eplip: memory squeeze\n");
++			return -ENOMEM;
++		}
++		strcpy(dev_eplip[i]->name, name);
+ 
+         	dev = kmalloc(sizeof ( ecp_dev ) , GFP_KERNEL ) ;
+         	if( !dev ) {
+@@ -2529,6 +2540,7 @@
+ 
+ #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,4,0)
+ #else
++/*
+ 		        dev_eplip[i].name = kmalloc(strlen("eplipXXX"), GFP_KERNEL);
+ 		        if (!dev_eplip[i].name) {
+ 			        printk(KERN_ERR "%s: memory squeeze.\n",driver);
+@@ -2537,10 +2549,11 @@
+ 			        cleanup( dev_eplip );
+ 			        return -ENOMEM ;
+ 		        }
++*/
+ #endif
+-		        sprintf(dev_eplip[i].name,"eplip%d", i );
++/*		        sprintf(dev_eplip[i].name,"eplip%d", i ); */
+ 
+-                        if ( ( error = eplip_init_dev(&(dev_eplip[i]),dev,hwaddr[i]/*,crc[i]*/ ) ) ) {
++                        if ( ( error = eplip_init_dev(dev_eplip[i], dev, hwaddr[i]/*,crc[i]*/ ) ) ) {
+ 
+                                 cleanup_ecp_dev(dev);
+                                 kfree(dev);
+@@ -2549,12 +2562,12 @@
+ 		        }
+                         //((struct net_local*)dev_eplip[i].priv)->uses_adler32crc = crc[i];
+ 
+-                        if( ( dev->mode == EPLIP_MODE_ECP_DMA ) && !(dev_eplip[i].dma) )
++                        if( ( dev->mode == EPLIP_MODE_ECP_DMA ) && !(dev_eplip[i]->dma) )
+                                 dev->mode = EPLIP_MODE_ECP_FIFO ;
+ 
+-                        if( ( error = register_netdev(&(dev_eplip[i]) ) ) ) {
++                        if ((error = register_netdev(dev_eplip[i]))) {
+ 
+-                                printk(KERN_ERR "%s: Failed to register device:%s\n",driver,dev_eplip[i].name);
++                                printk(KERN_ERR "%s: Failed to register device:%s\n",driver, dev_eplip[i]->name);
+                                 cleanup( dev_eplip );
+                                 return error;
+                         }

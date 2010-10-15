@@ -1,0 +1,20 @@
+--- eplip-0.5.6/eplip-drv.c.old	2010-10-12 15:59:19.000000000 +0200
++++ eplip-0.5.6/eplip-drv.c	2010-10-12 16:00:10.000000000 +0200
+@@ -401,7 +401,7 @@
+                                   struct hh_cache *hh);
+ #endif
+ static int	eplip_open(struct net_device *dev);
+-static int	eplip_interrupt(int irq, void *dev_id, struct pt_regs *regs);
++static int	eplip_interrupt(int irq, void *dev_id); /*, struct pt_regs *regs);*/
+ static int	eplip_close(struct net_device *dev);
+ static struct	net_device_stats *eplip_get_stats(struct net_device *dev);
+ static int      eplip_change_mtu(struct net_device *dev, int new_mtu);
+@@ -2193,7 +2193,7 @@
+  * Handle the network interface interrupts.
+  */
+ static int
+-eplip_interrupt(int irq, void *dev_id, struct pt_regs * regs)
++eplip_interrupt(int irq, void *dev_id) /* , struct pt_regs * regs) */
+ {
+         struct net_device *dev = dev_id;
+ 	struct net_local *nl;
