@@ -1,0 +1,14 @@
+--- eplip-0.5.6/eplip-drv.c.old	2010-10-17 08:38:24.000000000 +0200
++++ eplip-0.5.6/eplip-drv.c	2010-10-17 08:40:32.000000000 +0200
+@@ -714,9 +714,9 @@
+ 	struct ethhdr *eth;
+ 	unsigned char *rawp;
+ 
+-	skb->mac_header = skb->data;
++	skb_reset_mac_header(skb);
+ 	skb_pull(skb,dev->hard_header_len);
+-	eth= (struct ethhdr *)skb->mac_header;
++	eth = eth_hdr(skb);
+ 
+ 	if(*eth->h_dest&1)
+ 	{
