@@ -4,7 +4,7 @@
 
 %define		_orig_name	eplip
 %define		pname		kernel-net-eplip
-%define		_rel	3
+%define		_rel	4
 
 Summary:	EPLIP driver for 2.6.x kernels
 Summary(pl.UTF-8):	Sterownik EPLIP dla jąder 2.6.x
@@ -26,6 +26,7 @@ Patch7:		%{pname}-2.6.24.patch
 Patch8:		%{pname}-autoconf.patch
 Patch9:		%{pname}-2.6.32.patch
 Patch10:	%{pname}-x64.patch
+Patch11:	%{pname}-3.4.0.patch
 URL:		http://e-plip.sourceforge.net/
 %{?with_dist_kernel:BuildRequires:	kernel%{_alt_kernel}-module-build}
 BuildRequires:	rpmbuild(macros) >= 1.379
@@ -53,6 +54,7 @@ Moduł sterownika EPLIP (Enhanced Parallel Line IP) dla jąder 2.6.x.
 %patch8 -p1
 %patch9 -p1
 %patch10 -p1
+%patch11 -p1
 
 cat <<EOF > Makefile
 obj-m += eplip.o
