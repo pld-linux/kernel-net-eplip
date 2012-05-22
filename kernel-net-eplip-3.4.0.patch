@@ -1,0 +1,22 @@
+--- eplip-0.5.6/eplip-drv.c.old	2012-05-22 17:44:10.000000000 +0200
++++ eplip-0.5.6/eplip-drv.c	2012-05-22 17:44:29.000000000 +0200
+@@ -22,7 +22,7 @@
+ #include <linux/errno.h>        /* return values */
+ #include <linux/init.h>
+ #include <linux/delay.h>        /* udelay()                     */
+-#include <asm/system.h>         /* cli() sti()                  */
++//#include <asm/system.h>         /* cli() sti()                  */
+ #include <asm/bitops.h>
+ #include <asm/io.h>             /* inb() inw() outb() ...       */
+ #include <asm/dma.h>            /* PC DMAC releated stuff       */
+--- eplip-0.5.6/ecp.c.old	2012-05-22 17:47:21.000000000 +0200
++++ eplip-0.5.6/ecp.c	2012-05-22 17:47:39.000000000 +0200
+@@ -42,7 +42,7 @@ BUGS:   Too many to be listed ;-)
+ #  include <linux/sched.h>
+ #  include <linux/interrupt.h>
+ #  include <linux/delay.h>
+-#  include <asm/system.h>
++//#  include <asm/system.h>
+ #  include <asm/irq.h>
+ #  include <asm/dma.h>
+ #endif
