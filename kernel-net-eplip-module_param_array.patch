@@ -31,7 +31,7 @@
 +module_param_array(irq, int, NULL, 0);
 +module_param_array(dma, int, NULL, 0);
 +module_param_array(mode, int, NULL, 0);
-+module_param_array(hwaddr, int, NULL, 0);
++module_param_array(hwaddr, ulong, NULL, 0);
  
  MODULE_PARM_DESC(io  , "The Base IO port this device uses") ;
  MODULE_PARM_DESC(irq , "The IRQ Line this device uses");
