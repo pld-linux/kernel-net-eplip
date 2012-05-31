@@ -4,7 +4,7 @@
 
 %define		_orig_name	eplip
 %define		pname		kernel-net-eplip
-%define		_rel	4
+%define		_rel	5
 
 Summary:	EPLIP driver for 2.6.x kernels
 Summary(pl.UTF-8):	Sterownik EPLIP dla jąder 2.6.x
